@@ -1,7 +1,9 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import "react-toastify/dist/ReactToastify.css";
 
-export default function TaskHookForm() {
+export default function TaskHookForm(props) {
+  const { kisiler } = props;
   const {
     register,
     handleSubmit,
@@ -9,15 +11,9 @@ export default function TaskHookForm() {
   } = useForm({
     mode: "onChange",
   });
-
-  function gonder(data) {
-    console.log("servera gönder: ", data);
-  }
-
-  console.log("hatalar", errors);
-
+  function onChange(data) {}
   return (
-    <form className="taskForm" onSubmit={handleSubmit(gonder)}>
+    <form className="taskForm" onSubmit={handleSubmit(onChange)}>
       <div className="form-line">
         <label className="input-label" htmlFor="title">
           Başlık
@@ -26,7 +22,6 @@ export default function TaskHookForm() {
           className="input-text"
           id="title"
           name="title"
-          type="text"
           {...register("title", {
             required: "Task başlığı yazmalısınız",
             min: {
@@ -34,8 +29,9 @@ export default function TaskHookForm() {
               message: "Task başlığı en az 3 karakter olmalı",
             },
           })}
+          type="text"
         />
-        <p className="input-error">{errors.title.message}</p>
+        {errors.title && <p className="input-error">{errors.title.message}</p>}
       </div>
 
       <div className="form-line">
@@ -55,7 +51,9 @@ export default function TaskHookForm() {
             },
           })}
         ></textarea>
-        <p className="input-error">{errors.description.message}</p>
+        {errors.description && (
+          <p className="input-error">{errors.description.message}</p>
+        )}
       </div>
 
       <div className="form-line">
@@ -67,15 +65,26 @@ export default function TaskHookForm() {
                 type="checkbox"
                 name="people"
                 value={p}
-                onChange={handleCheckboxChange}
-                checked={formData.people.includes(p)}
+                {...register("people", {
+                  validate: {
+                    lessThanTen: (a) =>
+                      a.length >= 1 || "Lütfen en az bir kişi seçin",
+                  },
+                  validate: {
+                    lessThanTen: (v) =>
+                      v.length <= 3 || "En fazla 3 kişi seçebilirsiniz",
+                  },
+                })}
               />
               {p}
             </label>
           ))}
         </div>
-        <p className="input-error">{errors.people.message}</p>
+        {errors.people && (
+          <p className="input-error">{errors.people.message}</p>
+        )}
       </div>
+
       <div className="form-line">
         <button className="submit-button" type="submit" disabled={!isValid}>
           Kaydet
